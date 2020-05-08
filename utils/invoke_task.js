@@ -103,7 +103,14 @@ invokeTask.getHandler = function (grunt) {
 
         var lambda = invokeTask.loadFunction(options.file_name);
         var event = JSON.parse(fs.readFileSync(path.resolve(options.event), "utf8"));
-        lambda[options.handler](event, context, callback);
+        var promise = lambda[options.handler](event, context, callback);
+        if (promise) {
+          promise.then(function (result) {
+            context.succeed(result);
+          }).catch(function (err) {
+            context.fail(err);
+          });
+        }
     };
 };
 
